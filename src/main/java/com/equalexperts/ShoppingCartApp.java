@@ -3,6 +3,7 @@ package com.equalexperts;
 import com.equalexperts.bean.Cart;
 import com.equalexperts.bean.Product;
 import com.equalexperts.constants.ProductType;
+import com.equalexperts.utils.CartUtility;
 import org.json.JSONObject; // You can use org.json (lightweight dependency)
 
 import java.io.BufferedReader;
@@ -14,23 +15,6 @@ import java.util.Scanner;
 
 
 public class ShoppingCartApp {
-    private static Product fetchProductPrice(ProductType type) throws Exception {
-        String urlStr = "https://equalexperts.github.io" + type.getEndpoint();
-        URL url = new URL(urlStr);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
-            StringBuilder response = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                response.append(line);
-            }
-            JSONObject json = new JSONObject(response.toString());
-            BigDecimal price = json.getBigDecimal("price");
-            return new Product(type, price);
-        }
-    }
 
     public static void main(String[] args) {
         try (Scanner scanner = new Scanner(System.in)) {
@@ -53,7 +37,7 @@ public class ShoppingCartApp {
                             System.out.print("Enter quantity for " + type + ": ");
                             int qty = scanner.nextInt();
                             if (qty > 0) {
-                                Product product = fetchProductPrice(type);
+                                Product product = CartUtility.fetchProductPrice(type);
                                 cart.addProduct(product, qty);
                             }
                         }
@@ -63,7 +47,7 @@ public class ShoppingCartApp {
                         System.out.print("Enter product to update (Cheerios/Cornflakes/Frosties/Shreddies/Weetabix): ");
                         String updateName = scanner.next();
                         ProductType updateType = ProductType.valueOf(updateName);
-                        Product updateProduct = fetchProductPrice(updateType);
+                        Product updateProduct = CartUtility.fetchProductPrice(updateType);
                         System.out.print("Enter new quantity: ");
                         int newQty = scanner.nextInt();
                         cart.updateProductQuantity(updateProduct, newQty);
@@ -73,7 +57,7 @@ public class ShoppingCartApp {
                         System.out.print("Enter product to remove (Cheerios/Cornflakes/Frosties/Shreddies/Weetabix): ");
                         String removeName = scanner.next();
                         ProductType removeType = ProductType.valueOf(removeName);
-                        Product removeProduct = fetchProductPrice(removeType);
+                        Product removeProduct = CartUtility.fetchProductPrice(removeType);
                         cart.removeProduct(removeProduct);
                         break;
 
